@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue records</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .uncleared {
+            background-color: rgb(250, 71, 71); /* Complaints that are still open */
+            color: white;
+        }
+        .cleared {
+            background-color: rgb(250, 250, 69); /* Complaints that are closed */
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Issue Records of user-</h2>
+
+    <button onclick="addRandomComplaint()">Generate Complaint</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Staff ID</th>
+                <th>Reported Date</th>
+                <th>System Operation Level</th>
+                <th>Complete Action Date</th>
+                <th>Closing By Date</th>
+                <th>Closed Date</th>
+            </tr>
+        </thead>
+        <tbody id="complaintTable">
+            <!-- Data will be populated dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+        function fetchComplaints() {
+            fetch("http://localhost:5000/get_complaints")
+            .then(response => response.json())
+            .then(data => {
+                let table = document.getElementById("complaintTable");
+                table.innerHTML = "";  // Clear existing rows
+    
+                data.forEach(complaint => {
+                    let row = table.insertRow();
+                    row.classList.add(complaint.status);  // Apply class (cleared = yellow, uncleared = red)
+    
+                    row.innerHTML = `
+                        <td>${complaint.staff_id}</td>
+                        <td>${complaint.reported_date}</td>
+                        <td>${complaint.system_operation_level}</td>
+                        <td>${complaint.complete_action_date}</td>
+                        <td>${complaint.closing_by_date}</td>
+                        <td>${complaint.closed_date}</td>
+                    `;
+                });
+            })
+            .catch(error => console.error("Error fetching complaints:", error));
+        }
+    
+        function addComplaint() {
+            fetch("http://localhost:5000/add_complaint", { method: "POST" })
+            .then(response => response.json())
+            .then(() => fetchComplaints())  // Refresh table after adding a new complaint
+            .catch(error => console.error("Error adding complaint:", error));
+        }
+    
+        window.onload = fetchComplaints;  // Load data when page opens
+    </script>
+    
+</body>
+</html>

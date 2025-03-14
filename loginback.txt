@@ -1,0 +1,66 @@
+from flask import Flask, request, jsonify
+import mysql.connector
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+# Database Configuration
+db_config = {
+    "host": "localhost",  # Change this if your DB is hosted remotely
+    "user": "root",  # Change to your MySQL username
+    "password": "password",  # Change to your MySQL password
+    "database": "company_db"  # Ensure this database exists
+}
+
+# Function to create a database connection
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        return connection
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")  # Log MySQL connection error
+        return None
+
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.json  # Ensure request contains JSON
+        if not data:
+            return jsonify({"success": False, "message": "Invalid request, JSON data missing"}), 400
+
+        staff_id = data.get("staffId")
+        username = data.get("username")
+        password = data.get("password")
+
+        if not staff_id or not username or not password:
+            return jsonify({"success": False, "message": "Missing credentials"}), 400
+
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({"success": False, "message": "Database connection failed"}), 500
+
+        cursor = connection.cursor(dictionary=True)
+
+        # Debugging print statements
+        print(f"Received Login Request: staff_id={staff_id}, username={username}")
+
+        # Prevent SQL injection with parameterized query
+        query = "SELECT * FROM staff WHERE staff_id = %s AND username = %s AND password = %s"
+        cursor.execute(query, (staff_id, username, password))
+        user = cursor.fetchone()
+
+        cursor.close()
+        connection.close()
+
+        if user:
+            return jsonify({"success": True, "message": "Login successful"})
+        else:
+            return jsonify({"success": False, "message": "Invalid credentials"}), 401
+
+    except Exception as e:
+        print(f"Error: {e}")  # Log the error
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True)

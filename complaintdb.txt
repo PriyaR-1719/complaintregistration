@@ -1,0 +1,52 @@
+CREATE DATABASE complaint_system;
+USE complaint_system;
+
+
+
+CREATE TABLE complaints (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_id VARCHAR(20) NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    system_id VARCHAR(20) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    issue_type VARCHAR(50) NOT NULL,
+    uid VARCHAR(50),
+    ip_address VARCHAR(50),
+    mac_address VARCHAR(50),
+    model_name VARCHAR(50),
+    year_model VARCHAR(10),
+    remarks TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+INSERT INTO complaints (staff_id, username, system_id, department, status, issue_type, uid, ip_address, mac_address, model_name, year_model, remarks)
+VALUES 
+('101', 'admin', 'SYS001', 'IT Support', 'Open', 'Hardware Failure', 'UID123', '192.168.1.1', '00:1A:2B:3C:4D:5E', 'Dell Latitude', '2022', 'Screen not working'),
+('102', 'john_doe', 'SYS002', 'HR', 'In Progress', 'Software Crash', NULL, '192.168.1.2', '11:22:33:44:55:66', 'HP Pavilion', '2021', 'System freezes frequently');
+
+
+
+
+SELECT * FROM complaints;
+
+
+
+
+UPDATE complaints 
+SET status = 'Resolved' 
+WHERE id = 1;
+
+
+
+Update Flask app.config to use MySQL instead of SQLite:
+python
+Copy
+Edit
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost/complaint_system'
+
+
+
+SELECT * FROM complaints;

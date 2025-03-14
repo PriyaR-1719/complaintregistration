@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Login</title>
+    <style>
+        /* Reset Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Full Page Centering */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+
+        /* Logo Styling */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            width: 400px; 
+            height: 150px; /* Adjust size as needed */
+        }
+
+        /* Login Box Styling */
+        .login-container {
+            background: rgb(248, 246, 246);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid black; /* Sharp box border */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            text-align: center;
+        }
+
+        /* Headings */
+        h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        /* Input Field Group */
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        /* Button Styling */
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+   
+</head>
+<body>
+
+    <!-- Logo at the Top -->
+    <div class="logo-container">
+        <img src="C:\Users\Lenovo\Documents\bellogo.png" alt="Company Logo">
+    </div>
+
+    <!-- Login Box -->
+    <div class="login-container">
+        <h2>Staff Login</h2>
+        
+        <!-- Corrected Form -->
+        <form id="loginForm" onsubmit="loginUser(event)">
+            <div class="input-group">
+                <label for="staff-id">Staff ID</label>
+                <input type="text" id="staff-id" name="staff-id" required>
+            </div>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div>
+            
+
+                <a href = "complaint.html" class="btn">
+                    Log in</a>
+
+                    <style>
+                        .btn {
+                            display: inline-block;
+                            padding: 10px 20px;
+                            background-color: #007bff;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-size: 16px;
+                        }
+                    
+                        .btn:hover {
+                            background-color: #0056b3;
+                        }
+                    </style>
+                    
+                </a>
+                
+        </form>
+    </div>
+
+    <script>
+        function loginUser(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            const staffId = document.getElementById("staff-id").value;
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // Simulating an API call
+            fetch("http://localhost:5000/login", {  // Change URL for your Java API
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ staffId, username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Show response message
+                if (data.success) {
+                    window.location.href = "complaint.html"; // Redirect on successful login
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</body>
+</html>
