@@ -1,46 +1,30 @@
-CREATE DATABASE complaint_system;
-USE complaint_system;
-
-
-
-CREATE TABLE complaints (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    staff_id INT NOT NULL,
-    reported_date DATE NOT NULL,
-    system_operation_level ENUM('Low', 'Medium', 'High', 'Critical') NOT NULL,
-    complete_action_date DATE NULL,
-    closing_by_date DATE NOT NULL,
-    closed_date DATE NULL
+CREATE TABLE IF NOT EXISTS complaints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    staff_id TEXT NOT NULL,
+    reported_date TEXT NOT NULL,
+    system_operation_level TEXT NOT NULL,
+    complete_action_date TEXT,
+    closing_by_date TEXT,
+    closed_date TEXT,
+    status TEXT CHECK(status IN ('cleared', 'uncleared')) NOT NULL
 );
 
 
 
-INSERT INTO complaints (staff_id, reported_date, system_operation_level, complete_action_date, closing_by_date, closed_date)
-VALUES 
-(101, '2024-03-01', 'High', '2024-03-05', '2024-03-10', '2024-03-06'),
-(102, '2024-02-28', 'Medium', NULL, '2024-03-08', NULL),
-(103, '2024-02-25', 'Critical', '2024-02-27', '2024-03-05', '2024-02-28');
-
+INSERT INTO complaints 
+(staff_id, reported_date, system_operation_level, complete_action_date, closing_by_date, closed_date, status) 
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 
 SELECT * FROM complaints;
 
+
+SELECT * FROM complaints WHERE status = ?;
 
 UPDATE complaints 
-SET closed_date = '2024-03-07'
-WHERE id = 2;
+SET status = ? 
+WHERE id = ?;
 
 
-Update your Flask app.config to use MySQL instead of SQLite:
-python
-Copy
-Edit
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost/complaint_system'
+DELETE FROM complaints WHERE id = ?;
 
-
-
-Check MySQL Workbench with:
-sql
-Copy
-Edit
-SELECT * FROM complaints;

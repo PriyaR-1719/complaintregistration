@@ -9,6 +9,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            position: relative; /* Make the table's parent container position relative */
         }
         th, td {
             border: 1px solid black;
@@ -31,6 +32,16 @@
             font-size: 16px;
             cursor: pointer;
         }
+        /* Total complaints positioned in the top-right of the table */
+        .total-container {
+            position: absolute; /* Position it absolutely inside the table */
+            top: 65px;
+            right: 10px;
+            background-color: blue; /* Blue background */
+            color: white; /* White text color */
+            padding: 10px; /* Add padding for better spacing */
+            border-radius: 5px; /* Rounded corners */
+        }
     </style>
 </head>
 <body>
@@ -39,6 +50,7 @@
 
     <button onclick="addRandomComplaint()">Generate Complaint</button>
 
+    <!-- Table containing the total complaints in top-right corner -->
     <table>
         <thead>
             <tr>
@@ -53,6 +65,10 @@
         <tbody id="complaintTable">
             <!-- Data will be populated dynamically -->
         </tbody>
+        <!-- Total Complaints Field in the top-right of the table -->
+        <div class="total-container">
+            Total Complaints: <span id="totalComplaints">0</span>
+        </div>
     </table>
 
     <script>
@@ -62,11 +78,16 @@
             .then(data => {
                 let table = document.getElementById("complaintTable");
                 table.innerHTML = "";  // Clear existing rows
-    
+
+                // Update the total complaints counter
+                let totalComplaints = data.length;
+                document.getElementById("totalComplaints").textContent = totalComplaints;
+
+                // Populate the table with complaint data
                 data.forEach(complaint => {
                     let row = table.insertRow();
                     row.classList.add(complaint.status);  // Apply class (cleared = yellow, uncleared = red)
-    
+
                     row.innerHTML = `
                         <td>${complaint.staff_id}</td>
                         <td>${complaint.reported_date}</td>
@@ -79,14 +100,14 @@
             })
             .catch(error => console.error("Error fetching complaints:", error));
         }
-    
+
         function addComplaint() {
             fetch("http://localhost:5000/add_complaint", { method: "POST" })
             .then(response => response.json())
             .then(() => fetchComplaints())  // Refresh table after adding a new complaint
             .catch(error => console.error("Error adding complaint:", error));
         }
-    
+
         window.onload = fetchComplaints;  // Load data when page opens
     </script>
     

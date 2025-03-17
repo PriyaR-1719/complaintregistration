@@ -1,84 +1,85 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 import sqlite3
-from datetime import datetime, timedelta
-import random
 
-app = Flask(__name__)
+app = Flask(_name_)
 
-# Database setup
-def init_db():
-    conn = sqlite3.connect("complaints.db")
+# SQLite database file
+DATABASE = 'complaints.db'
+
+
+def get_db():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row  # This will allow us to access columns by name
+    return conn
+
+
+@app.route('/get_complaints', methods=['GET'])
+def get_complaints():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM complaints")  # Fetch all complaints
+    complaints = cursor.fetchall()
+    conn.close()
+
+    # Convert the rows into a list of dictionaries
+    complaints_list = []
+    for complaint in complaints:
+        complaints_list.append({
+            'staff_id': complaint['staff_id'],
+            'reported_date': complaint['reported_date'],
+            'system_operation_level': complaint['system_operation_level'],
+            'complete_action_date': complaint['complete_action_date'],
+            'closing_by_date': complaint['closing_by_date'],
+            'closed_date': complaint['closed_date'],
+            'status': complaint['status']
+        })
+    return jsonify(complaints_list)
+
+
+@app.route('/add_complaint', methods=['POST'])
+def add_complaint():
+    # Sample data, in a real app this would come from the request body
+    complaint = {
+        'staff_id': '12345',
+        'reported_date': '2025-03-14',
+        'system_operation_level': 'Level 1',
+        'complete_action_date': '2025-03-16',
+        'closing_by_date': '2025-03-17',
+        'closed_date': '2025-03-18',
+        'status': 'uncleared'  # or 'cleared'
+    }
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO complaints (staff_id, reported_date, system_operation_level, complete_action_date, closing_by_date, closed_date, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (complaint['staff_id'], complaint['reported_date'], complaint['system_operation_level'],
+          complaint['complete_action_date'], complaint['closing_by_date'], complaint['closed_date'], complaint['status']))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Complaint added successfully!"}), 201
+
+
+if _name_ == '_main_':
+    # Initialize the database and create the table if it doesn't exist
+    conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS complaints (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            staff_id INTEGER,
+            staff_id TEXT,
             reported_date TEXT,
             system_operation_level TEXT,
             complete_action_date TEXT,
             closing_by_date TEXT,
-            closed_date TEXT
+            closed_date TEXT,
+            status TEXT
         )
     """)
     conn.commit()
     conn.close()
 
-init_db()
-
-# Function to generate random dates
-def generate_random_date(days_ago=30):
-    today = datetime.today()
-    random_days = random.randint(1, days_ago)
-    random_date = today - timedelta(days=random_days)
-    return random_date.strftime("%Y-%m-%d")
-
-# API to add a random complaint
-@app.route("/add_complaint", methods=["POST"])
-def add_complaint():
-    staff_id = random.randint(1, 1000)
-    reported_date = generate_random_date()
-    system_operation_levels = ["Low", "Medium", "High", "Critical"]
-    system_operation_level = random.choice(system_operation_levels)
-    closing_by_date = generate_random_date(10)
-
-    # 50% chance of being cleared
-    is_cleared = random.random() > 0.5
-    complete_action_date = generate_random_date(5) if is_cleared else None
-    closed_date = generate_random_date(3) if is_cleared else None
-
-    conn = sqlite3.connect("complaints.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO complaints (staff_id, reported_date, system_operation_level, complete_action_date, closing_by_date, closed_date)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (staff_id, reported_date, system_operation_level, complete_action_date, closing_by_date, closed_date))
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "Complaint added successfully"}), 201
-
-# API to get all complaints
-@app.route("/get_complaints", methods=["GET"])
-def get_complaints():
-    conn = sqlite3.connect("complaints.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM complaints")
-    complaints = cursor.fetchall()
-    conn.close()
-
-    complaint_list = []
-    for complaint in complaints:
-        complaint_list.append({
-            "staff_id": complaint[1],
-            "reported_date": complaint[2],
-            "system_operation_level": complaint[3],
-            "complete_action_date": complaint[4] if complaint[4] else "Pending",
-            "closing_by_date": complaint[5],
-            "closed_date": complaint[6] if complaint[6] else "Open",
-            "status": "cleared" if complaint[6] else "uncleared"
-        })
-
-    return jsonify(complaint_list)
-
-if __name__ == "__main__":
     app.run(debug=True)
